@@ -1,1 +1,883 @@
-*/Was los hier!/*
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mocracy.de - Öffentlich-rechtliche Nachrichten & Talkshows Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #0a0e27;
+            --secondary-bg: #141933;
+            --card-bg: #1e2442;
+            --hover-bg: #2a3150;
+            --accent-color: #4f7cff;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a9c0;
+            --border-color: #2d3654;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--secondary-bg);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--danger);
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .current-time {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Category Filter */
+        .filter-section {
+            padding: 1.5rem 2rem;
+            background: var(--secondary-bg);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .filter-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-color);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Timeline Container */
+        .timeline-wrapper {
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .timeline-controls {
+            max-width: 1600px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-color);
+        }
+
+        .zoom-level {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: relative;
+            max-width: 1600px;
+            margin: 0 auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            background: var(--secondary-bg);
+            border-radius: 1rem;
+            padding: 2rem 0;
+            cursor: grab;
+        }
+
+        .timeline-container:active {
+            cursor: grabbing;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0 2rem;
+            min-width: max-content;
+            transform-origin: left center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Sendung Card */
+        .sendung-card {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+            width: 300px;
+        }
+
+        .sendung-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(79, 124, 255, 0.2);
+        }
+
+        .sendung-card.live {
+            border-color: var(--danger);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .card-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .card-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-thumbnail .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .live-badge-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .duration-badge {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            padding: 1rem;
+        }
+
+        .channel-tag {
+            display: inline-block;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-topic {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-time {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Expanded Card Details */
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: var(--hover-bg);
+            padding: 0 1rem;
+        }
+
+        .sendung-card:hover .card-details {
+            max-height: 400px;
+            padding: 1rem;
+        }
+
+        .card-description {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #6b8eff;
+            transform: scale(1.05);
+        }
+
+        .action-btn.secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-btn.secondary:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Rating System */
+        .rating-system {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .rating-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .rating-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .rating-btn.positive:hover {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .rating-btn.neutral:hover {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .rating-btn.negative:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .timeline-wrapper {
+                padding: 1rem;
+            }
+
+            .sendung-card {
+                width: 250px;
+            }
+
+            .filter-section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">mocracy.de</h1>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span style="font-weight: 600; font-size: 0.9rem;">LIVE</span>
+                </div>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category Filter -->
+    <section class="filter-section">
+        <div class="filter-container">
+            <button class="filter-btn active" data-category="all">Alle Sendungen</button>
+            <button class="filter-btn" data-category="nachrichten">Nachrichten</button>
+            <button class="filter-btn" data-category="talkshow">Talkshows</button>
+            <button class="filter-btn" data-category="kommentar">Kommentare & Meinung</button>
+            <button class="filter-btn" data-category="dokumentation">Dokumentationen</button>
+            <button class="filter-btn" data-category="politik">Politik</button>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="timeline-wrapper">
+        <div class="timeline-controls">
+            <h2 style="font-size: 1.5rem;">Live Timeline - Aktuelle Sendungen</h2>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomOut">-</button>
+                <div class="zoom-level" id="zoomLevel">100%</div>
+                <button class="zoom-btn" id="zoomIn">+</button>
+            </div>
+        </div>
+
+        <div class="timeline-container" id="timelineContainer">
+            <div class="timeline" id="timeline">
+                <!-- Loading State -->
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Lade aktuelle Sendungen...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Configuration
+        const API_URL = 'https://mediathekviewweb.de/api/query';
+        const CHANNELS = ['ARD', 'ZDF', 'Arte', 'Phoenix', '3sat', 'tagesschau24', 'ZDFinfo', 'tagesschau', 'heute'];
+
+        // Categories mapping
+        const CATEGORIES = {
+            nachrichten: ['tagesschau', 'heute', 'nachrichten', 'news', 'journal', 'tagesthemen', 'heute-journal'],
+            talkshow: ['maischberger', 'lanz', 'hart aber fair', 'illner', 'talk', 'diskussion', 'anne will'],
+            kommentar: ['kommentar', 'meinung', 'standpunkt', 'kolumne', 'heute-show', 'extra 3', 'anstalt'],
+            dokumentation: ['doku', 'dokumentation', 'reportage', 'bericht'],
+            politik: ['politik', 'bundestag', 'bundesregierung', 'wahlkampf', 'parlament']
+        };
+
+        // State
+        let currentCategory = 'all';
+        let zoomLevel = 100;
+        let allSendungen = [];
+        let isDragging = false;
+        let startX = 0;
+        let scrollLeft = 0;
+
+        // DOM Elements
+        const timeline = document.getElementById('timeline');
+        const timelineContainer = document.getElementById('timelineContainer');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomLevelDisplay = document.getElementById('zoomLevel');
+        const currentTimeDisplay = document.getElementById('currentTime');
+
+        // Initialize
+        init();
+
+        function init() {
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            setupEventListeners();
+            fetchSendungen();
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('de-DE', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('de-DE', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+            currentTimeDisplay.innerHTML = `${timeString}<br><small style="font-size: 0.7rem; color: var(--text-secondary);">${dateString}</small>`;
+        }
+
+        function setupEventListeners() {
+            // Category Filter
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    renderSendungen();
+                });
+            });
+
+            // Zoom Controls
+            zoomInBtn.addEventListener('click', () => {
+                zoomLevel = Math.min(200, zoomLevel + 10);
+                updateZoom();
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                zoomLevel = Math.max(50, zoomLevel - 10);
+                updateZoom();
+            });
+
+            // Drag to scroll
+            timelineContainer.addEventListener('mousedown', startDragging);
+            timelineContainer.addEventListener('mousemove', drag);
+            timelineContainer.addEventListener('mouseup', stopDragging);
+            timelineContainer.addEventListener('mouseleave', stopDragging);
+
+            // Touch support
+            timelineContainer.addEventListener('touchstart', handleTouchStart);
+            timelineContainer.addEventListener('touchmove', handleTouchMove);
+            timelineContainer.addEventListener('touchend', stopDragging);
+        }
+
+        function startDragging(e) {
+            isDragging = true;
+            startX = e.pageX - timelineContainer.offsetLeft;
+            scrollLeft = timelineContainer.scrollLeft;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - timelineContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            timelineContainer.scrollLeft = scrollLeft - walk;
+        }
+
+        function stopDragging() {
+            isDragging = false;
+        }
+
+        function handleTouchStart(e) {
+            startX = e.touches[0].pageX - timelineContainer.offsetLeft;
+            scrollLeft = timelineContainer.scrollLeft;
+        }
+
+        function handleTouchMove(e) {
+            const x = e.touches[0].pageX - timelineContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            timelineContainer.scrollLeft = scrollLeft - walk;
+        }
+
+        function updateZoom() {
+            timeline.style.transform = `scale(${zoomLevel / 100})`;
+            zoomLevelDisplay.textContent = `${zoomLevel}%`;
+        }
+
+        async function fetchSendungen() {
+            try {
+                timeline.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Lade aktuelle Sendungen...</p>
+                    </div>
+                `;
+
+                const now = new Date();
+                const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+                // Create queries for each channel
+                const queries = CHANNELS.map(channel => ({
+                    fields: ['channel'],
+                    query: channel
+                }));
+
+                const requestBody = {
+                    queries: queries,
+                    sortBy: 'timestamp',
+                    sortOrder: 'desc',
+                    future: true,
+                    offset: 0,
+                    size: 100,
+                    duration_min: 5 // Minimum 5 Minuten
+                };
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.result && data.result.results) {
+                    allSendungen = data.result.results
+                        .filter(sendung => {
+                            const sendungTime = new Date(sendung.timestamp * 1000);
+                            const sendungEnd = new Date(sendungTime.getTime() + sendung.duration * 1000);
+                            // Show if: started in last 2 hours OR currently running OR starting soon
+                            return sendungTime >= twoHoursAgo || sendungEnd >= now;
+                        })
+                        .sort((a, b) => {
+                            // Sort by: currently live first, then by start time
+                            const nowTimestamp = Date.now() / 1000;
+                            const aLive = a.timestamp <= nowTimestamp && (a.timestamp + a.duration) >= nowTimestamp;
+                            const bLive = b.timestamp <= nowTimestamp && (b.timestamp + b.duration) >= nowTimestamp;
+
+                            if (aLive && !bLive) return -1;
+                            if (!aLive && bLive) return 1;
+                            return b.timestamp - a.timestamp;
+                        });
+
+                    renderSendungen();
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('Error fetching sendungen:', error);
+                timeline.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">⚠️</div>
+                        <p>Fehler beim Laden der Sendungen.</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Bitte versuchen Sie es später erneut.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderSendungen() {
+            let filtered = allSendungen;
+
+            if (currentCategory !== 'all') {
+                const keywords = CATEGORIES[currentCategory] || [];
+                filtered = allSendungen.filter(sendung => {
+                    const searchText = `${sendung.title} ${sendung.topic}`.toLowerCase();
+                    return keywords.some(keyword => searchText.includes(keyword.toLowerCase()));
+                });
+            }
+
+            if (filtered.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            const now = Date.now() / 1000; // Current time in seconds
+
+            timeline.innerHTML = filtered.map(sendung => {
+                const isLive = sendung.timestamp <= now && (sendung.timestamp + sendung.duration) >= now;
+                const startTime = new Date(sendung.timestamp * 1000);
+                const formattedTime = startTime.toLocaleTimeString('de-DE', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const formattedDate = startTime.toLocaleDateString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit'
+                });
+                const duration = Math.floor(sendung.duration / 60);
+
+                // Extract channel color
+                const channelColors = {
+                    'ARD': '#2962ff',
+                    'ZDF': '#ff6d00',
+                    'Arte': '#e91e63',
+                    'Phoenix': '#00897b',
+                    '3sat': '#5e35b1',
+                    'tagesschau24': '#1565c0',
+                    'ZDFinfo': '#f57c00'
+                };
+                const channelColor = channelColors[sendung.channel] || 'var(--accent-color)';
+
+                return `
+                    <div class="sendung-card ${isLive ? 'live' : ''}" data-id="${sendung.id}">
+                        <div class="card-thumbnail">
+                            ${sendung.url_website ? `<div class="placeholder">📺</div>` : '<div class="placeholder">📺</div>'}
+                            ${isLive ? `
+                                <div class="live-badge">
+                                    <div class="live-badge-dot"></div>
+                                    LIVE
+                                </div>
+                            ` : ''}
+                            <div class="duration-badge">${duration} min</div>
+                        </div>
+                        <div class="card-content">
+                            <span class="channel-tag" style="background: ${channelColor};">${sendung.channel}</span>
+                            <h3 class="card-title">${sendung.title}</h3>
+                            <p class="card-topic">${sendung.topic || 'Keine Kategorie'}</p>
+                            <div class="card-time">
+                                <span>🕐 ${formattedTime}</span>
+                                <span style="color: var(--border-color);">•</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="card-description">
+                                ${sendung.description || 'Keine Beschreibung verfügbar.'}
+                            </div>
+                            <div class="card-actions">
+                                ${sendung.url_video ? `
+                                    <button class="action-btn" onclick="playVideo('${sendung.url_video}', '${sendung.title.replace(/'/g, "\\'")}')">
+                                        ▶️ Abspielen
+                                    </button>
+                                ` : ''}
+                                ${sendung.url_website ? `
+                                    <button class="action-btn secondary" onclick="window.open('${sendung.url_website}', '_blank')">
+                                        🔗 Website
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <div class="rating-system">
+                                <div class="rating-title">Stimmungsbarometer</div>
+                                <div class="rating-buttons">
+                                    <button class="rating-btn positive" onclick="rate('${sendung.id}', 'positive')">👍</button>
+                                    <button class="rating-btn neutral" onclick="rate('${sendung.id}', 'neutral')">😐</button>
+                                    <button class="rating-btn negative" onclick="rate('${sendung.id}', 'negative')">👎</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showNoResults() {
+            timeline.innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">🔍</div>
+                    <p>Keine Sendungen gefunden.</p>
+                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Versuchen Sie eine andere Kategorie.</p>
+                </div>
+            `;
+        }
+
+        function playVideo(url, title) {
+            // Open video in new window/tab
+            // In production, this could open a modal player
+            window.open(url, '_blank');
+            console.log(`Playing: ${title}`);
+        }
+
+        function rate(sendungId, rating) {
+            // Store rating (in production, this would go to a backend)
+            console.log(`Rating ${sendungId}: ${rating}`);
+            alert(`Vielen Dank für Ihre Bewertung! 🎉\n\nDiese Funktion wird in der Vollversion mit Benutzer-Login verfügbar sein.`);
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            console.log('Auto-refreshing sendungen...');
+            fetchSendungen();
+        }, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
