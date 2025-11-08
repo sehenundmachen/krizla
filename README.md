@@ -8,63 +8,106 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
 
 ### Aktuell implementiert:
 
-- **Waipu TV-Style Timeline**: Multi-Row Layout mit einem Sender pro Zeile
-- **15 Sender Support**:
+#### Timeline & Layout
+- **Waipu TV-Style Timeline**: Multi-Row Layout - ein Sender pro Zeile
+- **17 Sender Support**:
   - ARD, tagesschau, ZDF, Phoenix, Arte, 3sat
-  - BR, WDR, NDR, SWR, HR, MDR, RBB
-  - ZDFinfo, tagesschau24
-- **Zeitachse**: Horizontale Timeline mit Zeitmarkierungen (alle 30 Min)
-- **Program-Bubbles**: Länge entspricht Sendungsdauer (wie in Musikprogrammen)
-- **Live-Line**: Rote Linie zeigt aktuelle Zeit an
-- **Kategorien-Filter**:
-  - Nachrichten
-  - Talkshows
-  - Kommentare & Meinung
-  - Dokumentationen
-  - Politik
-- **Live-Erkennung**: Echtzeit-Anzeige aktuell laufender Sendungen
-- **Zoom-Funktion**: Skalierbare Timeline (50% - 200%)
+  - BR, WDR, NDR, SWR, HR, MDR, RBB, SR
+  - DW (Deutsche Welle), ZDFinfo, tagesschau24
+- **Program-Bubbles**: Länge = Sendungsdauer (wie Soundbars in DAWs)
+- **Zeitraster**: Gestrichelte Linien alle 60 Min (clean & minimal)
+- **JETZT-Marker**: Roter Badge zeigt aktuelle Zeit prominent
+- **Live-Line**: Rote vertikale Linie durch alle Sender
+- **Zoom-Funktion**: Skalierbar 50% - 200%
 - **Sticky Labels**: Sender-Namen bleiben beim Scrollen sichtbar
-- **Click-Details**: Tooltip mit erweiterten Infos beim Klick
-- **Video-Integration**: Direkter Zugriff auf Mediathek-Videos
-- **Auto-Refresh**: Automatische Aktualisierung alle 5 Minuten
-- **YouTube-Ready**: Channel IDs für Tagesschau, ZDF, Phoenix vorbereitet
+
+#### YouTube Integration (OHNE API Key!)
+- **RSS Feeds**: Tagesschau, ZDF heute, Phoenix
+- **Chronologische Integration**: YT-Videos nach Veröffentlichungszeit
+- **Kombinierte Timeline**: TV + YouTube zusammen sortiert
+- **YouTube-Badge**: Rotes YT-Symbol auf Videos
+
+#### Video-Preview Popup
+- **Embed-Player**: YouTube-Preview direkt im Popup (ohne Ton)
+- **Stylish Overlay**: "VORSCHAU" Badge über Video
+- **Titel & Meta**: Channel, Zeit, Beschreibung
+- **Action Buttons**: Abspielen, Website-Link
+
+#### Bewertungssystem
+- **Stimmungsbarometer**: 👍 Gut, 😐 OK, 👎 Schlecht
+- **Live Counter**: Zeigt Anzahl pro Option
+- **LocalStorage**: Bewertungen persistent gespeichert
+- **Visual Feedback**: Selection highlighting
+
+#### Kommentar-Funktion
+- **Textarea**: User können Meinung schreiben
+- **Pro Sendung**: Individuelle Kommentare
+- **LocalStorage**: Persistent gespeichert
+- **Server-Ready**: Vorbereitet für Backend-Integration
+
+#### Zukunfts-Vorschau
+- **Ausgegraut**: Future Sendungen mit 40% Opacity
+- **Grayscale**: Visual Unterscheidung
+- **Nicht klickbar**: pointer-events disabled
+- **+8h Preview**: Zeigt kommende Sendungen
+
+#### Filter & Features
+- **Kategorien-Filter**: Nachrichten, Talkshows, Kommentar, Dokus, Politik
+- **Live-Erkennung**: Rote Border + LIVE Badge
+- **Auto-Refresh**: Alle 5 Minuten
+- **Responsive**: Mobile-friendly Design
 
 ## Technologie
 
-### API:
-- **MediathekViewWeb API** - Aggregator für öffentlich-rechtliche Mediatheken
-  - ARD Mediathek
-  - ZDF Mediathek
-  - Arte
-  - Phoenix
-  - 3sat
-  - ORF (Österreich)
-  - SRF (Schweiz)
+### APIs:
+- **MediathekViewWeb API** - Öffentlich-rechtliche Mediatheken
+  - ARD, ZDF, Arte, Phoenix, 3sat, BR, WDR, NDR, SWR, HR, MDR, RBB, SR, DW
+  - Kostenlos & Open Source
+  - Keine API Key benötigt
+- **YouTube RSS Feeds** - Kostenlos ohne Quota
+  - Tagesschau, ZDF heute, Phoenix
+  - Keine API Key benötigt
+  - XML Feed Parsing
 
 ### Frontend:
-- Pure HTML5/CSS3/JavaScript
-- Keine Frameworks notwendig
-- Responsive Design
-- Modern Dark Theme
+- **Pure Vanilla JavaScript** - Keine Frameworks
+- **HTML5/CSS3** - Modern & Clean
+- **LocalStorage** - Client-side Persistenz
+- **Responsive Design** - Mobile & Desktop
+- **Dark Theme** - TV-App Aesthetik
 
-## Geplante Features
+## Geplante Features (Roadmap)
 
-- [ ] YouTube-Integration aktivieren (API Key benötigt)
-  - Videos von Tagesschau, ZDF heute, Phoenix in Timeline
-  - Sortierung nach Veröffentlichungszeit zusammen mit TV
-- [ ] User-Login System
-- [ ] Kommentar-Funktion für Sendungen
-- [ ] Persistente Bewertungen & Stimmungsbarometer
-- [ ] Video-Player Integration (statt externe Links)
-- [ ] Such-Funktion über alle Sendungen
-- [ ] Favoriten/Watchlist
-- [ ] Share-Funktionalität
-- [ ] Push-Benachrichtigungen für favorisierte Sendungen
-- [ ] Statistiken & Trends zu Sendungen
-- [ ] Backend-API für User-Daten
-- [ ] Weitere Sender: ORF (Österreich), SRF (Schweiz)
-- [ ] Export-Funktion für Timeline
+### Backend & Infrastruktur
+- [ ] **Backend-API** für User-Daten (Node.js/Python)
+- [ ] **User-Login System** (OAuth, Email/Password)
+- [ ] **Datenbank** für Bewertungen & Kommentare (PostgreSQL/MongoDB)
+- [ ] **Real-time Sync** - Bewertungen/Kommentare live synchronisieren
+
+### Community Features
+- [ ] **Öffentliche Kommentare** - Alle User-Kommentare anzeigen
+- [ ] **User-Profile** - Eigene Timeline mit Bewertungen
+- [ ] **Trending Sendungen** - Meist-diskutierte Shows
+- [ ] **Notification System** - Alerts für favorisierte Sender/Themen
+
+### Erweiterte Features
+- [ ] **Integrated Video Player** - Abspielen direkt in Timeline
+- [ ] **Suchfunktion** - Volltext-Suche über alle Sendungen
+- [ ] **Favoriten/Watchlist** - Sendungen für später merken
+- [ ] **Share-Buttons** - Social Media Integration
+- [ ] **Export-Funktion** - Timeline als PDF/iCal
+- [ ] **Analytics Dashboard** - Statistiken & Trends visualisieren
+
+### Internationale Erweiterung
+- [ ] **ORF** (Österreich) - österreichische Sender
+- [ ] **SRF** (Schweiz) - schweizer Sender
+- [ ] **Weitere EU-Sender** - Arte FR, BR Alpha International
+
+### Optimierungen
+- [ ] **Performance** - Lazy Loading für Sendungen
+- [ ] **PWA** - Installierbare App
+- [ ] **Offline Mode** - Caching für Timeline
+- [ ] **A11y** - Barrierefreiheit verbessern
 
 ## Installation
 
@@ -74,15 +117,31 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
 
 ## Nutzung
 
-- **Kategorien wählen**: Klicke auf die Filter-Buttons oben
-- **Timeline navigieren**: Horizontal und vertikal scrollen
-- **Zoom**: +/- Buttons rechts oben (50% - 200%)
-- **Details anzeigen**: Klick auf Sendung öffnet Tooltip
-- **Live-Sendungen**: Rote Markierung + LIVE Badge
-- **Zeitachse**: Zeitmarkierungen alle 30 Minuten
-- **NOW-Line**: Rote Linie zeigt aktuelle Zeit
-- **Video abspielen**: "Abspielen" Button im Tooltip
-- **Sender-Rows**: Jeder Sender hat eigene Zeile (wie Waipu TV)
+### Navigation
+- **Scrollen**: Horizontal & Vertikal durch Timeline navigieren
+- **Zoom**: +/- Buttons (50% - 200% Skalierung)
+- **Kategorien**: Filter für Nachrichten, Talkshows, Kommentar, Dokus, Politik
+- **NOW-Marker**: Roter "JETZT" Badge zeigt aktuelle Zeit
+- **Live-Line**: Rote vertikale Linie markiert Gegenwart
+
+### Sendungen
+- **Live**: Rote Border + LIVE Badge bei laufenden Sendungen
+- **Zukunft**: Ausgegraute Sendungen (nicht klickbar)
+- **YouTube**: Rotes YT-Symbol auf YouTube-Videos
+- **Click**: Öffnet detailliertes Popup
+
+### Popup-Features
+- **Video-Preview**: YouTube/Mediathek-Vorschau (ohne Ton)
+- **Abspielen**: Direkt zur Mediathek/YouTube
+- **Bewerten**: 👍 Gut, 😐 OK, 👎 Schlecht
+- **Kommentieren**: Eigene Meinung zur Sendung schreiben
+- **Speichern**: Bewertung & Kommentar in LocalStorage
+
+### Pro-Tipps
+- Bewertungen & Kommentare bleiben lokal gespeichert
+- Zoom rein für mehr Details, raus für Übersicht
+- Future-Sendungen zeigen was noch kommt
+- YouTube-Videos zeigen neueste Uploads der Sender
 
 ## Legal
 
