@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mocracy.de - Öffentlich-rechtliche Nachrichten & Talkshows Timeline</title>
+    <title>mocracy.de - Live TV Timeline für öffentlich-rechtliche Sender</title>
     <style>
         * {
             margin: 0;
@@ -23,10 +23,26 @@
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --youtube-red: #FF0000;
+
+            /* Sender Colors */
+            --ard-color: #2962ff;
+            --zdf-color: #ff6d00;
+            --arte-color: #e91e63;
+            --phoenix-color: #00897b;
+            --3sat-color: #5e35b1;
+            --br-color: #1976d2;
+            --wdr-color: #0288d1;
+            --ndr-color: #0097a7;
+            --swr-color: #00acc1;
+            --hr-color: #26c6da;
+            --mdr-color: #00bcd4;
+            --rbb-color: #4dd0e1;
+            --sr-color: #81d4fa;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--primary-bg);
             color: var(--text-primary);
             overflow-x: hidden;
@@ -36,7 +52,7 @@
         .header {
             background: var(--secondary-bg);
             border-bottom: 2px solid var(--border-color);
-            padding: 1.5rem 2rem;
+            padding: 1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -44,20 +60,18 @@
         }
 
         .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
+            max-width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             background: linear-gradient(135deg, var(--accent-color), #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .live-indicator {
@@ -65,14 +79,14 @@
             align-items: center;
             gap: 0.5rem;
             background: rgba(239, 68, 68, 0.1);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 2rem;
             border: 1px solid var(--danger);
         }
 
         .live-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: var(--danger);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -84,24 +98,22 @@
         }
 
         .current-time {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-secondary);
         }
 
         /* Category Filter */
         .filter-section {
-            padding: 1.5rem 2rem;
+            padding: 1rem 2rem;
             background: var(--secondary-bg);
             border-bottom: 1px solid var(--border-color);
             overflow-x: auto;
         }
 
         .filter-container {
-            max-width: 1600px;
-            margin: 0 auto;
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
         }
 
@@ -109,10 +121,10 @@
             background: var(--card-bg);
             border: 2px solid var(--border-color);
             color: var(--text-primary);
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 2rem;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
             white-space: nowrap;
@@ -126,18 +138,17 @@
         .filter-btn.active {
             background: var(--accent-color);
             border-color: var(--accent-color);
-            color: white;
         }
 
         /* Timeline Container */
         .timeline-wrapper {
-            padding: 2rem;
+            padding: 1.5rem 0;
+            height: calc(100vh - 180px);
             overflow: hidden;
         }
 
         .timeline-controls {
-            max-width: 1600px;
-            margin: 0 auto 1.5rem;
+            padding: 0 2rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -153,7 +164,7 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.8rem;
             border-radius: 0.5rem;
             cursor: pointer;
             font-size: 1rem;
@@ -167,270 +178,215 @@
 
         .zoom-level {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            min-width: 80px;
+            font-size: 0.85rem;
+            min-width: 70px;
             text-align: center;
         }
 
-        /* Timeline */
-        .timeline-container {
+        /* TV Program Grid - Waipu Style */
+        .tv-grid-container {
             position: relative;
-            max-width: 1600px;
-            margin: 0 auto;
+            height: calc(100% - 50px);
             overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: auto;
             background: var(--secondary-bg);
-            border-radius: 1rem;
-            padding: 2rem 0;
-            cursor: grab;
         }
 
-        .timeline-container:active {
-            cursor: grabbing;
-        }
-
-        .timeline {
-            display: flex;
-            gap: 1.5rem;
-            padding: 0 2rem;
-            min-width: max-content;
-            transform-origin: left center;
-            transition: transform 0.3s ease;
-        }
-
-        /* Sendung Card */
-        .sendung-card {
+        .tv-grid {
             position: relative;
-            background: var(--card-bg);
-            border-radius: 0.75rem;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            flex-shrink: 0;
-            width: 300px;
+            min-width: 100%;
+            padding-bottom: 2rem;
         }
 
-        .sendung-card:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(79, 124, 255, 0.2);
-        }
-
-        .sendung-card.live {
-            border-color: var(--danger);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .card-thumbnail {
-            position: relative;
-            width: 100%;
-            height: 160px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-        }
-
-        .card-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .card-thumbnail .placeholder {
+        /* Time Ruler */
+        .time-ruler {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--secondary-bg);
+            border-bottom: 2px solid var(--border-color);
+            height: 40px;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            padding-left: 150px;
+        }
+
+        .time-marker {
+            position: absolute;
+            border-left: 1px solid var(--border-color);
             height: 100%;
-            font-size: 3rem;
-            opacity: 0.3;
-        }
-
-        .live-badge {
-            position: absolute;
-            top: 0.75rem;
-            left: 0.75rem;
-            background: var(--danger);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
+            padding: 0.5rem 0.5rem;
             font-size: 0.75rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .live-badge-dot {
-            width: 6px;
-            height: 6px;
-            background: white;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        .duration-badge {
-            position: absolute;
-            bottom: 0.75rem;
-            right: 0.75rem;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
+            color: var(--text-secondary);
             font-weight: 600;
         }
 
-        .card-content {
-            padding: 1rem;
+        .time-marker.now {
+            border-left: 2px solid var(--danger);
+            color: var(--danger);
+            z-index: 10;
         }
 
-        .channel-tag {
-            display: inline-block;
-            background: var(--accent-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
+        /* Channel Row */
+        .channel-row {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px;
+            position: relative;
+        }
+
+        .channel-label {
+            position: sticky;
+            left: 0;
+            z-index: 90;
+            width: 150px;
+            background: var(--card-bg);
+            border-right: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            gap: 0.3rem;
+        }
+
+        .channel-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .channel-type {
             font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
         }
 
-        .card-title {
-            font-size: 1rem;
+        .youtube-badge {
+            background: var(--youtube-red);
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.3rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
+        }
+
+        /* Program Timeline */
+        .program-timeline {
+            flex: 1;
+            position: relative;
+            min-height: 80px;
+        }
+
+        /* Program Bubble */
+        .program-bubble {
+            position: absolute;
+            top: 5px;
+            height: 70px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .program-bubble:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 124, 255, 0.3);
+            z-index: 50;
+        }
+
+        .program-bubble.live {
+            border-color: var(--danger);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(239, 68, 68, 0.1) 100%);
+        }
+
+        .program-bubble.youtube {
+            border-left: 4px solid var(--youtube-red);
+        }
+
+        .program-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 0.3rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .card-topic {
-            font-size: 0.85rem;
+        .program-time {
+            font-size: 0.7rem;
             color: var(--text-secondary);
-            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .program-topic {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: auto;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .card-time {
+        .live-badge-small {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+            gap: 0.2rem;
         }
 
-        /* Expanded Card Details */
-        .card-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            background: var(--hover-bg);
-            padding: 0 1rem;
+        .live-badge-dot-small {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
         }
 
-        .sendung-card:hover .card-details {
-            max-height: 400px;
-            padding: 1rem;
-        }
-
-        .card-description {
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .action-btn {
-            flex: 1;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            background: #6b8eff;
-            transform: scale(1.05);
-        }
-
-        .action-btn.secondary {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-        }
-
-        .action-btn.secondary:hover {
-            background: var(--hover-bg);
-        }
-
-        /* Rating System */
-        .rating-system {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .rating-title {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .rating-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .rating-btn {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.2s;
-        }
-
-        .rating-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .rating-btn.positive:hover {
-            background: var(--success);
-            border-color: var(--success);
-        }
-
-        .rating-btn.neutral:hover {
-            background: var(--warning);
-            border-color: var(--warning);
-        }
-
-        .rating-btn.negative:hover {
+        /* Now Line */
+        .now-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
             background: var(--danger);
-            border-color: var(--danger);
+            z-index: 80;
+            pointer-events: none;
         }
 
-        /* Loading State */
+        .now-line-head {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: 12px;
+            height: 12px;
+            background: var(--danger);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        /* Loading */
         .loading {
             text-align: center;
             padding: 3rem;
@@ -452,23 +408,66 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* No Results */
-        .no-results {
-            text-align: center;
-            padding: 3rem;
+        /* Tooltip */
+        .program-tooltip {
+            position: fixed;
+            background: var(--hover-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-width: 400px;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            display: none;
+            pointer-events: none;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tooltip-description {
+            font-size: 0.85rem;
+            line-height: 1.4;
             color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
-        .no-results-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
+        .tooltip-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        /* Scrollbar Styling */
+        .tooltip-btn {
+            flex: 1;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tooltip-btn:hover {
+            background: #6b8eff;
+        }
+
+        .tooltip-btn.secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Scrollbar */
         ::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
+            height: 10px;
+            width: 10px;
         }
 
         ::-webkit-scrollbar-track {
@@ -477,7 +476,7 @@
 
         ::-webkit-scrollbar-thumb {
             background: var(--border-color);
-            border-radius: 4px;
+            border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -486,24 +485,21 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
+            .channel-label {
+                width: 100px;
             }
 
-            .logo {
-                font-size: 1.5rem;
+            .time-ruler {
+                padding-left: 100px;
             }
 
-            .timeline-wrapper {
-                padding: 1rem;
+            .program-bubble {
+                height: 60px;
+                padding: 0.4rem;
             }
 
-            .sendung-card {
-                width: 250px;
-            }
-
-            .filter-section {
-                padding: 1rem;
+            .program-title {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -513,10 +509,10 @@
     <header class="header">
         <div class="header-content">
             <h1 class="logo">mocracy.de</h1>
-            <div style="display: flex; align-items: center; gap: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
                 <div class="live-indicator">
                     <div class="live-dot"></div>
-                    <span style="font-weight: 600; font-size: 0.9rem;">LIVE</span>
+                    <span style="font-weight: 600; font-size: 0.85rem;">LIVE</span>
                 </div>
                 <div class="current-time" id="currentTime"></div>
             </div>
@@ -538,7 +534,7 @@
     <!-- Timeline -->
     <section class="timeline-wrapper">
         <div class="timeline-controls">
-            <h2 style="font-size: 1.5rem;">Live Timeline - Aktuelle Sendungen</h2>
+            <h2 style="font-size: 1.3rem;">TV Programm Timeline</h2>
             <div class="zoom-controls">
                 <button class="zoom-btn" id="zoomOut">-</button>
                 <div class="zoom-level" id="zoomLevel">100%</div>
@@ -546,23 +542,44 @@
             </div>
         </div>
 
-        <div class="timeline-container" id="timelineContainer">
-            <div class="timeline" id="timeline">
-                <!-- Loading State -->
+        <div class="tv-grid-container" id="tvGridContainer">
+            <div class="tv-grid" id="tvGrid">
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Lade aktuelle Sendungen...</p>
+                    <p>Lade TV Programm...</p>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Tooltip -->
+    <div class="program-tooltip" id="tooltip"></div>
+
     <script>
         // Configuration
         const API_URL = 'https://mediathekviewweb.de/api/query';
-        const CHANNELS = ['ARD', 'ZDF', 'Arte', 'Phoenix', '3sat', 'tagesschau24', 'ZDFinfo', 'tagesschau', 'heute'];
+        const YOUTUBE_API_KEY = 'YOUR_API_KEY'; // TODO: Add YouTube API Key
 
-        // Categories mapping
+        // Channels Configuration
+        const CHANNELS = [
+            { id: 'ARD', name: 'ARD', color: 'var(--ard-color)', type: 'TV' },
+            { id: 'tagesschau', name: 'tagesschau', color: 'var(--ard-color)', type: 'TV', youtube: 'UC5NOEUbkLheQcaaRldYW5GA' },
+            { id: 'ZDF', name: 'ZDF', color: 'var(--zdf-color)', type: 'TV', youtube: 'UCeqKIgPQfNInOswGRWt48kQ' },
+            { id: 'Phoenix', name: 'Phoenix', color: 'var(--phoenix-color)', type: 'TV', youtube: 'UCwyiPnNlT8UABRmGmU0T9jg' },
+            { id: 'Arte', name: 'Arte', color: 'var(--arte-color)', type: 'TV' },
+            { id: '3sat', name: '3sat', color: 'var(--3sat-color)', type: 'TV' },
+            { id: 'BR', name: 'BR', color: 'var(--br-color)', type: 'TV' },
+            { id: 'WDR', name: 'WDR', color: 'var(--wdr-color)', type: 'TV' },
+            { id: 'NDR', name: 'NDR', color: 'var(--ndr-color)', type: 'TV' },
+            { id: 'SWR', name: 'SWR', color: 'var(--swr-color)', type: 'TV' },
+            { id: 'HR', name: 'HR', color: 'var(--hr-color)', type: 'TV' },
+            { id: 'MDR', name: 'MDR', color: 'var(--mdr-color)', type: 'TV' },
+            { id: 'RBB', name: 'RBB', color: 'var(--rbb-color)', type: 'TV' },
+            { id: 'ZDFinfo', name: 'ZDFinfo', color: 'var(--zdf-color)', type: 'TV' },
+            { id: 'tagesschau24', name: 'tagesschau24', color: 'var(--ard-color)', type: 'TV' }
+        ];
+
+        // Categories
         const CATEGORIES = {
             nachrichten: ['tagesschau', 'heute', 'nachrichten', 'news', 'journal', 'tagesthemen', 'heute-journal'],
             talkshow: ['maischberger', 'lanz', 'hart aber fair', 'illner', 'talk', 'diskussion', 'anne will'],
@@ -574,19 +591,20 @@
         // State
         let currentCategory = 'all';
         let zoomLevel = 100;
-        let allSendungen = [];
-        let isDragging = false;
-        let startX = 0;
-        let scrollLeft = 0;
+        let allPrograms = {};
+        let timelineStart = null;
+        let timelineEnd = null;
+        const PIXELS_PER_MINUTE = 2;
 
-        // DOM Elements
-        const timeline = document.getElementById('timeline');
-        const timelineContainer = document.getElementById('timelineContainer');
+        // DOM
+        const tvGrid = document.getElementById('tvGrid');
+        const tvGridContainer = document.getElementById('tvGridContainer');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const zoomInBtn = document.getElementById('zoomIn');
         const zoomOutBtn = document.getElementById('zoomOut');
         const zoomLevelDisplay = document.getElementById('zoomLevel');
         const currentTimeDisplay = document.getElementById('currentTime');
+        const tooltip = document.getElementById('tooltip');
 
         // Initialize
         init();
@@ -595,289 +613,214 @@
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000);
             setupEventListeners();
-            fetchSendungen();
+            fetchAllPrograms();
         }
 
         function updateCurrentTime() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('de-DE', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            const dateString = now.toLocaleDateString('de-DE', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
-            currentTimeDisplay.innerHTML = `${timeString}<br><small style="font-size: 0.7rem; color: var(--text-secondary);">${dateString}</small>`;
+            const timeString = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+            currentTimeDisplay.innerHTML = `${timeString}<br><small style="font-size: 0.65rem;">${dateString}</small>`;
         }
 
         function setupEventListeners() {
-            // Category Filter
             filterButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     filterButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     currentCategory = btn.dataset.category;
-                    renderSendungen();
+                    renderTimeline();
                 });
             });
 
-            // Zoom Controls
             zoomInBtn.addEventListener('click', () => {
-                zoomLevel = Math.min(200, zoomLevel + 10);
+                zoomLevel = Math.min(200, zoomLevel + 20);
                 updateZoom();
             });
 
             zoomOutBtn.addEventListener('click', () => {
-                zoomLevel = Math.max(50, zoomLevel - 10);
+                zoomLevel = Math.max(50, zoomLevel - 20);
                 updateZoom();
             });
-
-            // Drag to scroll
-            timelineContainer.addEventListener('mousedown', startDragging);
-            timelineContainer.addEventListener('mousemove', drag);
-            timelineContainer.addEventListener('mouseup', stopDragging);
-            timelineContainer.addEventListener('mouseleave', stopDragging);
-
-            // Touch support
-            timelineContainer.addEventListener('touchstart', handleTouchStart);
-            timelineContainer.addEventListener('touchmove', handleTouchMove);
-            timelineContainer.addEventListener('touchend', stopDragging);
-        }
-
-        function startDragging(e) {
-            isDragging = true;
-            startX = e.pageX - timelineContainer.offsetLeft;
-            scrollLeft = timelineContainer.scrollLeft;
-        }
-
-        function drag(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const x = e.pageX - timelineContainer.offsetLeft;
-            const walk = (x - startX) * 2;
-            timelineContainer.scrollLeft = scrollLeft - walk;
-        }
-
-        function stopDragging() {
-            isDragging = false;
-        }
-
-        function handleTouchStart(e) {
-            startX = e.touches[0].pageX - timelineContainer.offsetLeft;
-            scrollLeft = timelineContainer.scrollLeft;
-        }
-
-        function handleTouchMove(e) {
-            const x = e.touches[0].pageX - timelineContainer.offsetLeft;
-            const walk = (x - startX) * 2;
-            timelineContainer.scrollLeft = scrollLeft - walk;
         }
 
         function updateZoom() {
-            timeline.style.transform = `scale(${zoomLevel / 100})`;
             zoomLevelDisplay.textContent = `${zoomLevel}%`;
+            renderTimeline();
         }
 
-        async function fetchSendungen() {
+        async function fetchAllPrograms() {
             try {
-                timeline.innerHTML = `
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        <p>Lade aktuelle Sendungen...</p>
-                    </div>
-                `;
-
                 const now = new Date();
-                const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+                const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+                const fourHoursLater = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
-                // Create queries for each channel
-                const queries = CHANNELS.map(channel => ({
-                    fields: ['channel'],
-                    query: channel
-                }));
+                timelineStart = fourHoursAgo;
+                timelineEnd = fourHoursLater;
 
+                // Fetch from MediathekViewWeb API for all channels
+                const promises = CHANNELS.map(channel => fetchChannelPrograms(channel.id));
+                const results = await Promise.all(promises);
+
+                allPrograms = {};
+                results.forEach((programs, index) => {
+                    const channelId = CHANNELS[index].id;
+                    allPrograms[channelId] = programs.filter(p => matchesCategory(p));
+                });
+
+                renderTimeline();
+            } catch (error) {
+                console.error('Error fetching programs:', error);
+                tvGrid.innerHTML = '<div class="loading"><p>Fehler beim Laden</p></div>';
+            }
+        }
+
+        async function fetchChannelPrograms(channelId) {
+            try {
                 const requestBody = {
-                    queries: queries,
+                    queries: [{ fields: ['channel'], query: channelId }],
                     sortBy: 'timestamp',
                     sortOrder: 'desc',
                     future: true,
                     offset: 0,
-                    size: 100,
-                    duration_min: 5 // Minimum 5 Minuten
+                    size: 50,
+                    duration_min: 3
                 };
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
-
-                if (data.result && data.result.results) {
-                    allSendungen = data.result.results
-                        .filter(sendung => {
-                            const sendungTime = new Date(sendung.timestamp * 1000);
-                            const sendungEnd = new Date(sendungTime.getTime() + sendung.duration * 1000);
-                            // Show if: started in last 2 hours OR currently running OR starting soon
-                            return sendungTime >= twoHoursAgo || sendungEnd >= now;
-                        })
-                        .sort((a, b) => {
-                            // Sort by: currently live first, then by start time
-                            const nowTimestamp = Date.now() / 1000;
-                            const aLive = a.timestamp <= nowTimestamp && (a.timestamp + a.duration) >= nowTimestamp;
-                            const bLive = b.timestamp <= nowTimestamp && (b.timestamp + b.duration) >= nowTimestamp;
-
-                            if (aLive && !bLive) return -1;
-                            if (!aLive && bLive) return 1;
-                            return b.timestamp - a.timestamp;
-                        });
-
-                    renderSendungen();
-                } else {
-                    showNoResults();
-                }
+                return data.result?.results || [];
             } catch (error) {
-                console.error('Error fetching sendungen:', error);
-                timeline.innerHTML = `
-                    <div class="no-results">
-                        <div class="no-results-icon">⚠️</div>
-                        <p>Fehler beim Laden der Sendungen.</p>
-                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">Bitte versuchen Sie es später erneut.</p>
-                    </div>
-                `;
+                console.error(`Error fetching ${channelId}:`, error);
+                return [];
             }
         }
 
-        function renderSendungen() {
-            let filtered = allSendungen;
+        function matchesCategory(program) {
+            if (currentCategory === 'all') return true;
+            const keywords = CATEGORIES[currentCategory] || [];
+            const searchText = `${program.title} ${program.topic}`.toLowerCase();
+            return keywords.some(kw => searchText.includes(kw.toLowerCase()));
+        }
 
-            if (currentCategory !== 'all') {
-                const keywords = CATEGORIES[currentCategory] || [];
-                filtered = allSendungen.filter(sendung => {
-                    const searchText = `${sendung.title} ${sendung.topic}`.toLowerCase();
-                    return keywords.some(keyword => searchText.includes(keyword.toLowerCase()));
-                });
+        function renderTimeline() {
+            if (!timelineStart || !timelineEnd) return;
+
+            const totalMinutes = (timelineEnd - timelineStart) / (1000 * 60);
+            const timelineWidth = totalMinutes * PIXELS_PER_MINUTE * (zoomLevel / 100);
+
+            let html = '';
+
+            // Time Ruler
+            html += '<div class="time-ruler" style="width: ' + (timelineWidth + 150) + 'px;">';
+            for (let i = 0; i <= totalMinutes; i += 30) {
+                const time = new Date(timelineStart.getTime() + i * 60 * 1000);
+                const x = 150 + (i * PIXELS_PER_MINUTE * (zoomLevel / 100));
+                const isNow = Math.abs(time - new Date()) < 15 * 60 * 1000;
+                html += `<div class="time-marker ${isNow ? 'now' : ''}" style="left: ${x}px;">${time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</div>`;
             }
+            html += '</div>';
 
-            if (filtered.length === 0) {
-                showNoResults();
-                return;
-            }
+            // Now Line
+            const nowX = 150 + calculatePosition(new Date());
+            html += `<div class="now-line" style="left: ${nowX}px; height: ${CHANNELS.length * 81}px;"><div class="now-line-head"></div></div>`;
 
-            const now = Date.now() / 1000; // Current time in seconds
+            // Channel Rows
+            CHANNELS.forEach(channel => {
+                const programs = allPrograms[channel.id] || [];
+                html += `
+                    <div class="channel-row">
+                        <div class="channel-label" style="background: ${channel.color}20;">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-type">${channel.type}</div>
+                            ${channel.youtube ? '<div class="youtube-badge">YT</div>' : ''}
+                        </div>
+                        <div class="program-timeline" style="width: ${timelineWidth}px;">
+                            ${renderPrograms(programs, channel)}
+                        </div>
+                    </div>
+                `;
+            });
 
-            timeline.innerHTML = filtered.map(sendung => {
-                const isLive = sendung.timestamp <= now && (sendung.timestamp + sendung.duration) >= now;
-                const startTime = new Date(sendung.timestamp * 1000);
-                const formattedTime = startTime.toLocaleTimeString('de-DE', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                const formattedDate = startTime.toLocaleDateString('de-DE', {
-                    day: '2-digit',
-                    month: '2-digit'
-                });
-                const duration = Math.floor(sendung.duration / 60);
+            tvGrid.innerHTML = html;
+            attachProgramListeners();
+        }
 
-                // Extract channel color
-                const channelColors = {
-                    'ARD': '#2962ff',
-                    'ZDF': '#ff6d00',
-                    'Arte': '#e91e63',
-                    'Phoenix': '#00897b',
-                    '3sat': '#5e35b1',
-                    'tagesschau24': '#1565c0',
-                    'ZDFinfo': '#f57c00'
-                };
-                const channelColor = channelColors[sendung.channel] || 'var(--accent-color)';
+        function renderPrograms(programs, channel) {
+            const now = Date.now() / 1000;
+            return programs.map(program => {
+                const startTime = new Date(program.timestamp * 1000);
+                const endTime = new Date((program.timestamp + program.duration) * 1000);
+
+                if (endTime < timelineStart || startTime > timelineEnd) return '';
+
+                const left = calculatePosition(startTime);
+                const width = calculateWidth(program.duration);
+                const isLive = program.timestamp <= now && (program.timestamp + program.duration) >= now;
 
                 return `
-                    <div class="sendung-card ${isLive ? 'live' : ''}" data-id="${sendung.id}">
-                        <div class="card-thumbnail">
-                            ${sendung.url_website ? `<div class="placeholder">📺</div>` : '<div class="placeholder">📺</div>'}
-                            ${isLive ? `
-                                <div class="live-badge">
-                                    <div class="live-badge-dot"></div>
-                                    LIVE
-                                </div>
-                            ` : ''}
-                            <div class="duration-badge">${duration} min</div>
+                    <div class="program-bubble ${isLive ? 'live' : ''}"
+                         style="left: ${left}px; width: ${width}px;"
+                         data-program='${JSON.stringify(program)}'>
+                        ${isLive ? '<div class="live-badge-small"><div class="live-badge-dot-small"></div>LIVE</div>' : ''}
+                        <div class="program-title">${program.title}</div>
+                        <div class="program-time">
+                            ${startTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                            - ${endTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <div class="card-content">
-                            <span class="channel-tag" style="background: ${channelColor};">${sendung.channel}</span>
-                            <h3 class="card-title">${sendung.title}</h3>
-                            <p class="card-topic">${sendung.topic || 'Keine Kategorie'}</p>
-                            <div class="card-time">
-                                <span>🕐 ${formattedTime}</span>
-                                <span style="color: var(--border-color);">•</span>
-                                <span>${formattedDate}</span>
-                            </div>
-                        </div>
-                        <div class="card-details">
-                            <div class="card-description">
-                                ${sendung.description || 'Keine Beschreibung verfügbar.'}
-                            </div>
-                            <div class="card-actions">
-                                ${sendung.url_video ? `
-                                    <button class="action-btn" onclick="playVideo('${sendung.url_video}', '${sendung.title.replace(/'/g, "\\'")}')">
-                                        ▶️ Abspielen
-                                    </button>
-                                ` : ''}
-                                ${sendung.url_website ? `
-                                    <button class="action-btn secondary" onclick="window.open('${sendung.url_website}', '_blank')">
-                                        🔗 Website
-                                    </button>
-                                ` : ''}
-                            </div>
-                            <div class="rating-system">
-                                <div class="rating-title">Stimmungsbarometer</div>
-                                <div class="rating-buttons">
-                                    <button class="rating-btn positive" onclick="rate('${sendung.id}', 'positive')">👍</button>
-                                    <button class="rating-btn neutral" onclick="rate('${sendung.id}', 'neutral')">😐</button>
-                                    <button class="rating-btn negative" onclick="rate('${sendung.id}', 'negative')">👎</button>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="program-topic">${program.topic || ''}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function showNoResults() {
-            timeline.innerHTML = `
-                <div class="no-results">
-                    <div class="no-results-icon">🔍</div>
-                    <p>Keine Sendungen gefunden.</p>
-                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Versuchen Sie eine andere Kategorie.</p>
+        function calculatePosition(date) {
+            const minutes = (date - timelineStart) / (1000 * 60);
+            return minutes * PIXELS_PER_MINUTE * (zoomLevel / 100);
+        }
+
+        function calculateWidth(durationSeconds) {
+            const minutes = durationSeconds / 60;
+            return Math.max(minutes * PIXELS_PER_MINUTE * (zoomLevel / 100), 80);
+        }
+
+        function attachProgramListeners() {
+            document.querySelectorAll('.program-bubble').forEach(bubble => {
+                bubble.addEventListener('click', (e) => {
+                    const program = JSON.parse(bubble.dataset.program);
+                    showTooltip(program, e);
+                });
+            });
+        }
+
+        function showTooltip(program, event) {
+            const rect = event.target.getBoundingClientRect();
+            tooltip.innerHTML = `
+                <div class="tooltip-title">${program.title}</div>
+                <div class="tooltip-description">${program.description || 'Keine Beschreibung verfügbar.'}</div>
+                <div class="tooltip-actions">
+                    ${program.url_video ? `<button class="tooltip-btn" onclick="window.open('${program.url_video}', '_blank')">▶️ Abspielen</button>` : ''}
+                    ${program.url_website ? `<button class="tooltip-btn secondary" onclick="window.open('${program.url_website}', '_blank')">🔗 Website</button>` : ''}
                 </div>
             `;
+            tooltip.style.display = 'block';
+            tooltip.style.left = Math.min(rect.left, window.innerWidth - 420) + 'px';
+            tooltip.style.top = (rect.bottom + 10) + 'px';
         }
 
-        function playVideo(url, title) {
-            // Open video in new window/tab
-            // In production, this could open a modal player
-            window.open(url, '_blank');
-            console.log(`Playing: ${title}`);
-        }
-
-        function rate(sendungId, rating) {
-            // Store rating (in production, this would go to a backend)
-            console.log(`Rating ${sendungId}: ${rating}`);
-            alert(`Vielen Dank für Ihre Bewertung! 🎉\n\nDiese Funktion wird in der Vollversion mit Benutzer-Login verfügbar sein.`);
-        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.program-bubble') && !e.target.closest('.program-tooltip')) {
+                tooltip.style.display = 'none';
+            }
+        });
 
         // Auto-refresh every 5 minutes
-        setInterval(() => {
-            console.log('Auto-refreshing sendungen...');
-            fetchSendungen();
-        }, 5 * 60 * 1000);
+        setInterval(fetchAllPrograms, 5 * 60 * 1000);
     </script>
 </body>
 </html>
