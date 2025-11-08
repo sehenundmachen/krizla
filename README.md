@@ -8,8 +8,14 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
 
 ### Aktuell implementiert:
 
-- **Live Timeline**: Horizontale Timeline mit aktuellen und laufenden Sendungen
-- **Multi-Channel Support**: ARD, ZDF, Arte, Phoenix, 3sat, ZDFinfo, tagesschau24
+- **Waipu TV-Style Timeline**: Multi-Row Layout mit einem Sender pro Zeile
+- **15 Sender Support**:
+  - ARD, tagesschau, ZDF, Phoenix, Arte, 3sat
+  - BR, WDR, NDR, SWR, HR, MDR, RBB
+  - ZDFinfo, tagesschau24
+- **Zeitachse**: Horizontale Timeline mit Zeitmarkierungen (alle 30 Min)
+- **Program-Bubbles**: Länge entspricht Sendungsdauer (wie in Musikprogrammen)
+- **Live-Line**: Rote Linie zeigt aktuelle Zeit an
 - **Kategorien-Filter**:
   - Nachrichten
   - Talkshows
@@ -18,11 +24,11 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
   - Politik
 - **Live-Erkennung**: Echtzeit-Anzeige aktuell laufender Sendungen
 - **Zoom-Funktion**: Skalierbare Timeline (50% - 200%)
-- **Drag-to-Scroll**: Intuitive Navigation
-- **Hover-Details**: Erweiterte Infos bei Mouse-Over
-- **Stimmungsbarometer**: Bewertungssystem für Sendungen
+- **Sticky Labels**: Sender-Namen bleiben beim Scrollen sichtbar
+- **Click-Details**: Tooltip mit erweiterten Infos beim Klick
 - **Video-Integration**: Direkter Zugriff auf Mediathek-Videos
 - **Auto-Refresh**: Automatische Aktualisierung alle 5 Minuten
+- **YouTube-Ready**: Channel IDs für Tagesschau, ZDF, Phoenix vorbereitet
 
 ## Technologie
 
@@ -44,18 +50,21 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
 
 ## Geplante Features
 
-- [ ] YouTube-Integration für ÖR-Kanäle (Tagesschau, ZDF, etc.)
+- [ ] YouTube-Integration aktivieren (API Key benötigt)
+  - Videos von Tagesschau, ZDF heute, Phoenix in Timeline
+  - Sortierung nach Veröffentlichungszeit zusammen mit TV
 - [ ] User-Login System
-- [ ] Kommentar-Funktion
-- [ ] Persistente Bewertungen
+- [ ] Kommentar-Funktion für Sendungen
+- [ ] Persistente Bewertungen & Stimmungsbarometer
 - [ ] Video-Player Integration (statt externe Links)
-- [ ] Timeline-Zeitachse mit Zeitmarkierungen
-- [ ] Such-Funktion
+- [ ] Such-Funktion über alle Sendungen
 - [ ] Favoriten/Watchlist
 - [ ] Share-Funktionalität
 - [ ] Push-Benachrichtigungen für favorisierte Sendungen
-- [ ] Statistiken & Trends
+- [ ] Statistiken & Trends zu Sendungen
 - [ ] Backend-API für User-Daten
+- [ ] Weitere Sender: ORF (Österreich), SRF (Schweiz)
+- [ ] Export-Funktion für Timeline
 
 ## Installation
 
@@ -66,11 +75,14 @@ Eine moderne Web-Plattform zur Live-Ansicht und Dokumentation von Sendungen öff
 ## Nutzung
 
 - **Kategorien wählen**: Klicke auf die Filter-Buttons oben
-- **Timeline navigieren**: Drag & Scroll horizontal
-- **Zoom**: +/- Buttons rechts oben
-- **Details anzeigen**: Mouse-Hover über Sendungen
-- **Video abspielen**: "Abspielen" Button in den Details
-- **Bewerten**: Stimmungsbarometer (👍 😐 👎)
+- **Timeline navigieren**: Horizontal und vertikal scrollen
+- **Zoom**: +/- Buttons rechts oben (50% - 200%)
+- **Details anzeigen**: Klick auf Sendung öffnet Tooltip
+- **Live-Sendungen**: Rote Markierung + LIVE Badge
+- **Zeitachse**: Zeitmarkierungen alle 30 Minuten
+- **NOW-Line**: Rote Linie zeigt aktuelle Zeit
+- **Video abspielen**: "Abspielen" Button im Tooltip
+- **Sender-Rows**: Jeder Sender hat eigene Zeile (wie Waipu TV)
 
 ## Legal
 
